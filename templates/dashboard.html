@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDDE Dashboard - Indicadores</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo">
+                <span class="logo-icon">&#127979;</span>
+                <div>
+                    <h1>PDDE Dashboard</h1>
+                    <p>Programa Dinheiro Direto na Escola</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <span class="update-info">
+                    {% set file_count = file_index | length %}
+                    {{ file_count }} arquivo{{ 's' if file_count != 1 else '' }} carregado{{ 's' if file_count != 1 else '' }}
+                    &mdash; {{ summary.total_schools }} escolas
+                </span>
+                <a href="/" class="btn btn-outline">&#128196; Gerenciar Arquivos</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main dash-main">
+
+        <!-- Year Filter (only when multiple years loaded) -->
+        {% if all_years | length > 1 %}
+        <section class="year-filter-bar" id="yearFilterBar">
+            <span class="year-filter-label">&#128197; Filtrar por ano:</span>
+            <div class="year-chips" id="yearChips">
+                {% for year in all_years %}
+                <label class="year-chip active" id="chip-{{ year }}">
+                    <input type="checkbox" class="year-cb" value="{{ year }}" checked hidden>
+                    {{ year }}
+                </label>
+                {% endfor %}
+            </div>
+            <button class="btn-all-years" id="btnAllYears">Todos os anos</button>
+        </section>
+        {% endif %}
+
+        <!-- KPI Cards -->
+        <section class="kpi-section">
+            <div class="kpi-card kpi-blue">
+                <div class="kpi-icon">&#127979;</div>
+                <div class="kpi-body">
+                    <span class="kpi-label">Total de Escolas</span>
+                    <span class="kpi-value">{{ summary.total_schools }}</span>
+                </div>
+            </div>
+            <div class="kpi-card kpi-green">
+                <div class="kpi-icon">&#128200;</div>
+                <div class="kpi-body">
+                    <span class="kpi-label">Total Geral PDDE</span>
+                    <span class="kpi-value">R$ {{ "{:,.2f}".format(summary.total_geral).replace(",", "X").replace(".", ",").replace("X", ".") }}</span>
+                </div>
+            </div>
+            <div class="kpi-card kpi-purple">
+                <div class="kpi-icon">&#9989;</div>
+                <div class="kpi-body">
+                    <span class="kpi-label">PDDE EQUIDADE</span>
+                    <span class="kpi-value">R$ {{ "{:,.2f}".format(summary.total_pdde_equidade).replace(",", "X").replace(".", ",").replace("X", ".") }}</span>
+                    <span class="kpi-sub">{{ summary.schools_with_equidade }} escolas</span>
+                </div>
+            </div>
+            <div class="kpi-card kpi-orange">
+                <div class="kpi-icon">&#127891;</div>
+                <div class="kpi-body">
+                    <span class="kpi-label">PDDE QUALIDADE</span>
+                    <span class="kpi-value">R$ {{ "{:,.2f}".format(summary.total_pdde_qualidade).replace(",", "X").replace(".", ",").replace("X", ".") }}</span>
+                    <span class="kpi-sub">{{ summary.schools_with_qualidade }} escolas</span>
+                </div>
+            </div>
+            <div class="kpi-card kpi-teal">
+                <div class="kpi-icon">&#128176;</div>
+                <div class="kpi-body">
+                    <span class="kpi-label">PDDE Básico</span>
+                    <span class="kpi-value">R$ {{ "{:,.2f}".format(summary.total_pdde_basico).replace(",", "X").replace(".", ",").replace("X", ".") }}</span>
+                    <span class="kpi-sub">{{ summary.schools_with_basico }} escolas</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts Row -->
+        <section class="charts-section">
+            <div class="chart-card">
+                <h3>Distribuição por Programa</h3>
+                <div class="chart-wrap">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card chart-wide">
+                <h3>Top 10 Municípios por Valor Recebido</h3>
+                <div class="chart-wrap">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Insights -->
+        <section class="insights-section">
+            <h3>&#128161; Insights</h3>
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <span class="insight-icon">&#127942;</span>
+                    <div>
+                        <strong>Maior beneficiada</strong>
+                        <p>{{ summary.top5_schools[0].nome if summary.top5_schools else '-' }} &mdash;
+                        R$ {{ "{:,.2f}".format(summary.top5_schools[0].total).replace(",","X").replace(".",",").replace("X",".") if summary.top5_schools else '0,00' }}</p>
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <span class="insight-icon">&#128202;</span>
+                    <div>
+                        <strong>Cobertura EQUIDADE</strong>
+                        <p>{{ ((summary.schools_with_equidade / summary.total_schools) * 100)|round(1) }}% das escolas recebem PDDE EQUIDADE</p>
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <span class="insight-icon">&#128218;</span>
+                    <div>
+                        <strong>Cobertura QUALIDADE</strong>
+                        <p>{{ ((summary.schools_with_qualidade / summary.total_schools) * 100)|round(1) }}% das escolas recebem PDDE QUALIDADE</p>
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <span class="insight-icon">&#127970;</span>
+                    <div>
+                        <strong>Município destaque</strong>
+                        <p>{{ summary.top_municipios[0].municipio if summary.top_municipios else '-' }} lidera com R$ {{ "{:,.2f}".format(summary.top_municipios[0].total).replace(",","X").replace(".",",").replace("X",".") if summary.top_municipios else '0,00' }}</p>
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <span class="insight-icon">&#128176;</span>
+                    <div>
+                        <strong>Média por escola</strong>
+                        <p>R$ {{ "{:,.2f}".format(summary.total_geral / summary.total_schools if summary.total_schools else 0).replace(",","X").replace(".",",").replace("X",".") }} por escola em média</p>
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <span class="insight-icon">&#9989;</span>
+                    <div>
+                        <strong>Participação EQUIDADE no total</strong>
+                        <p>{{ ((summary.total_pdde_equidade / summary.total_geral) * 100)|round(1) if summary.total_geral else 0 }}% do total é destinado ao EQUIDADE</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Top 5 Table -->
+        <section class="table-section">
+            <div class="table-header">
+                <h3>Top 5 Escolas por Total Recebido</h3>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Escola</th>
+                            <th>Município</th>
+                            <th>PDDE Básico</th>
+                            <th>PDDE EQUIDADE</th>
+                            <th>PDDE QUALIDADE</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in summary.top5_schools %}
+                        <tr id="top5-{{ loop.index }}">
+                            <td><span class="rank">{{ loop.index }}</span></td>
+                            <td class="escola-name"></td>
+                            <td class="escola-mun"></td>
+                            <td class="escola-bas"></td>
+                            <td class="escola-eq"></td>
+                            <td class="escola-qual"></td>
+                            <td class="escola-tot"><strong></strong></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Full Table -->
+        <section class="table-section">
+            <div class="table-header">
+                <h3>Todas as Escolas</h3>
+                <input type="search" id="searchInput" placeholder="&#128269; Buscar escola ou município..." class="search-box">
+            </div>
+            <div class="table-wrap">
+                <table id="schoolTable">
+                    <thead>
+                        <tr>
+                            <th>Escola</th>
+                            <th>Município</th>
+                            <th>UF</th>
+                            <th>Rede</th>
+                            <th>PDDE Básico</th>
+                            <th>PDDE EQUIDADE</th>
+                            <th>PDDE QUALIDADE</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr><td colspan="8" class="loading-row">Carregando dados...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination" id="pagination"></div>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        <p>PDDE Dashboard &copy; 2025 &mdash; Ministério da Educação / FNDE</p>
+    </footer>
+
+    <script>
+        const SUMMARY   = {{ summary | tojson }};
+        const ALL_YEARS = {{ all_years | tojson }};
+        let activeYears = new Set(ALL_YEARS);
+
+        function getYearsParam() {
+            if (activeYears.size === 0 || activeYears.size === ALL_YEARS.length) return '';
+            return [...activeYears].join(',');
+        }
+
+        // Charts are initialized below inside the year-filter block (pieChart / barChart)
+
+        // Table pagination
+        let currentPage = 1;
+        let currentSearch = '';
+        const perPage = 20;
+
+        function fmt(val) {
+            return 'R$ ' + (parseFloat(val) || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+        }
+
+        async function loadTable(page, search) {
+            const yp = getYearsParam();
+            const yearsQS = yp ? `&years=${yp}` : '';
+            const res = await fetch(`/api/schools?page=${page}&per_page=${perPage}&search=${encodeURIComponent(search)}${yearsQS}`);
+            const data = await res.json();
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            if (!data.schools.length) {
+                tbody.innerHTML = '<tr><td colspan="8" class="loading-row">Nenhuma escola encontrada.</td></tr>';
+                return;
+            }
+            data.schools.forEach(s => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${s.nome_escola}</td>
+                    <td>${s.municipio || '-'}</td>
+                    <td>${s.uf || '-'}</td>
+                    <td>${s.rede || '-'}</td>
+                    <td class="val">${fmt(s.pdde_basico)}</td>
+                    <td class="val">${fmt(s.pdde_equidade)}</td>
+                    <td class="val">${fmt(s.pdde_qualidade)}</td>
+                    <td class="val total-col"><strong>${fmt(s.total)}</strong></td>
+                `;
+                tbody.appendChild(tr);
+            });
+            buildPagination(data.total, page);
+        }
+
+        function buildPagination(total, current) {
+            const pages = Math.ceil(total / perPage);
+            const div = document.getElementById('pagination');
+            div.innerHTML = '';
+            if (pages <= 1) return;
+            const addBtn = (label, page, disabled) => {
+                const btn = document.createElement('button');
+                btn.textContent = label;
+                btn.className = 'page-btn' + (page === current ? ' active' : '');
+                btn.disabled = disabled;
+                btn.onclick = () => { currentPage = page; loadTable(page, currentSearch); };
+                div.appendChild(btn);
+            };
+            addBtn('«', 1, current === 1);
+            addBtn('‹', current - 1, current === 1);
+            const start = Math.max(1, current - 2);
+            const end = Math.min(pages, current + 2);
+            for (let p = start; p <= end; p++) addBtn(p, p, false);
+            addBtn('›', current + 1, current === pages);
+            addBtn('»', pages, current === pages);
+        }
+
+        // Populate top-5 rows from API
+        async function loadTop5() {
+            const yp = getYearsParam();
+            const res = await fetch('/api/data' + (yp ? `?years=${yp}` : ''));
+            const data = await res.json();
+            const top5 = data.schools.sort((a, b) => b.total - a.total).slice(0, 5);
+            top5.forEach((s, i) => {
+                const row = document.getElementById(`top5-${i+1}`);
+                if (!row) return;
+                row.querySelector('.escola-name').textContent = s.nome_escola;
+                row.querySelector('.escola-mun').textContent = s.municipio || '-';
+                row.querySelector('.escola-bas').textContent = fmt(s.pdde_basico);
+                row.querySelector('.escola-eq').textContent = fmt(s.pdde_equidade);
+                row.querySelector('.escola-qual').textContent = fmt(s.pdde_qualidade);
+                row.querySelector('.escola-tot strong').textContent = fmt(s.total);
+            });
+        }
+
+        let searchTimer;
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                currentSearch = e.target.value;
+                currentPage = 1;
+                loadTable(1, currentSearch);
+            }, 300);
+        });
+
+        // Initial data load
+        loadTable(1, '');
+        loadTop5();
+
+        // ── Year filter ──────────────────────────────────────────────────
+        // ALL_YEARS / activeYears / getYearsParam defined at top of script
+
+        async function refreshDashboard() {
+            const yp = getYearsParam();
+            const qs = yp ? `?years=${yp}` : '';
+            const res = await fetch(`/api/data${qs}`);
+            if (!res.ok) return;
+            const data = await res.json();
+            const s = data.summary;
+
+            // Update KPI cards
+            document.querySelector('.kpi-blue  .kpi-value').textContent = s.total_schools;
+            document.querySelector('.kpi-green .kpi-value').textContent = 'R$ ' + s.total_geral.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+            document.querySelector('.kpi-purple .kpi-value').textContent = 'R$ ' + s.total_pdde_equidade.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+            document.querySelector('.kpi-purple .kpi-sub').textContent = s.schools_with_equidade + ' escolas';
+            document.querySelector('.kpi-orange .kpi-value').textContent = 'R$ ' + s.total_pdde_qualidade.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+            document.querySelector('.kpi-orange .kpi-sub').textContent = s.schools_with_qualidade + ' escolas';
+            document.querySelector('.kpi-teal  .kpi-value').textContent = 'R$ ' + s.total_pdde_basico.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+            document.querySelector('.kpi-teal  .kpi-sub').textContent = s.schools_with_basico + ' escolas';
+
+            // Update pie chart
+            pieChart.data.datasets[0].data = [s.total_pdde_basico, s.total_pdde_equidade, s.total_pdde_qualidade];
+            pieChart.update();
+
+            // Update bar chart
+            barChart.data.labels   = s.top_municipios.map(m => m.municipio);
+            barChart.data.datasets[0].data = s.top_municipios.map(m => m.total);
+            barChart.update();
+
+            // Reload table and top 5
+            loadTable(1, currentSearch);
+            loadTop5();
+        }
+
+        if (ALL_YEARS.length > 1) {
+            document.querySelectorAll('.year-cb').forEach(cb => {
+                cb.closest('label').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const year = parseInt(cb.value);
+                    if (activeYears.has(year)) {
+                        if (activeYears.size === 1) return; // keep at least one
+                        activeYears.delete(year);
+                        this.classList.remove('active');
+                    } else {
+                        activeYears.add(year);
+                        this.classList.add('active');
+                    }
+                    refreshDashboard();
+                });
+            });
+
+            document.getElementById('btnAllYears').addEventListener('click', () => {
+                activeYears = new Set(ALL_YEARS);
+                document.querySelectorAll('.year-chip').forEach(c => c.classList.add('active'));
+                refreshDashboard();
+            });
+        }
+
+        // Store chart references for filter update
+        const pieChart = (() => {
+            const ctx = document.getElementById('pieChart').getContext('2d');
+            return Chart.getChart(ctx.canvas) || new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['PDDE Básico', 'PDDE EQUIDADE', 'PDDE QUALIDADE'],
+                    datasets: [{ data: [SUMMARY.total_pdde_basico, SUMMARY.total_pdde_equidade, SUMMARY.total_pdde_qualidade],
+                        backgroundColor: ['#3b82f6', '#8b5cf6', '#f59e0b'], borderWidth: 2, borderColor: '#fff' }]
+                },
+                options: { responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' },
+                        tooltip: { callbacks: { label: (ctx) => ` R$ ${ctx.raw.toLocaleString('pt-BR', {minimumFractionDigits: 2})}` } } } }
+            });
+        })();
+
+        const barChart = (() => {
+            const ctx = document.getElementById('barChart').getContext('2d');
+            return Chart.getChart(ctx.canvas) || new Chart(ctx, {
+                type: 'bar',
+                data: { labels: SUMMARY.top_municipios.map(m => m.municipio),
+                    datasets: [{ label: 'Total PDDE (R$)', data: SUMMARY.top_municipios.map(m => m.total),
+                        backgroundColor: '#3b82f6cc', borderColor: '#3b82f6', borderWidth: 1, borderRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                    plugins: { legend: { display: false },
+                        tooltip: { callbacks: { label: (ctx) => ` R$ ${ctx.raw.toLocaleString('pt-BR', {minimumFractionDigits: 2})}` } } },
+                    scales: { x: { ticks: { callback: (v) => 'R$ ' + (v/1000).toFixed(0) + 'k' } } } }
+            });
+        })();
+    </script>
+</body>
+</html>

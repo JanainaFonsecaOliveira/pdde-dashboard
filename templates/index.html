@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDDE Dashboard - Upload</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo">
+                <span class="logo-icon">&#127979;</span>
+                <div>
+                    <h1>PDDE Dashboard</h1>
+                    <p>Programa Dinheiro Direto na Escola</p>
+                </div>
+            </div>
+            {% if file_index %}
+            <a href="/dashboard" class="btn btn-primary">Ver Dashboard</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="upload-section">
+            <div class="upload-card">
+                <div class="upload-icon">&#128196;</div>
+                <h2>Importar Dados das Escolas</h2>
+                <p class="upload-desc">
+                    Envie uma ou mais planilhas exportadas do FNDE (<strong>.xls</strong> ou <strong>.xlsx</strong>).
+                    Como o FNDE exporta por ano, você pode selecionar múltiplos arquivos de uma vez —
+                    os dados serão mesclados automaticamente.
+                </p>
+
+                <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data">
+                    <div class="drop-zone" id="dropZone">
+                        <input type="file" id="fileInput" name="file" accept=".xls,.xlsx" multiple hidden>
+                        <div class="drop-content" id="dropContent">
+                            <span class="drop-icon">&#128190;</span>
+                            <p>Arraste os arquivos aqui ou <button type="button" class="link-btn" onclick="document.getElementById('fileInput').click()">clique para selecionar</button></p>
+                            <small>Formatos: .xls, .xlsx &mdash; múltiplos arquivos permitidos &mdash; máx. 32 MB cada</small>
+                        </div>
+                        <div class="drop-content" id="selectedFilesContent" style="display:none">
+                            <span class="drop-icon">&#9989;</span>
+                            <div id="fileList" class="file-chip-list"></div>
+                            <small>Clique em <strong>Enviar</strong> para processar</small>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg" id="submitBtn" disabled>
+                        <span id="btnText">&#128640; Enviar e Processar</span>
+                        <span id="btnLoading" style="display:none">&#8987; Processando...</span>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Arquivos já carregados -->
+        {% if file_index %}
+        <section class="loaded-files-section">
+            <h3>&#128194; Arquivos Carregados</h3>
+            <p class="section-desc">Os dados de todos os arquivos abaixo estão mesclados no dashboard. Você pode remover qualquer arquivo individualmente.</p>
+            <div class="files-list">
+                {% for filename, meta in file_index.items() %}
+                <div class="file-row">
+                    <div class="file-info">
+                        <span class="file-name-icon">&#128196;</span>
+                        <div>
+                            <strong class="file-name">{{ filename }}</strong>
+                            <span class="file-meta">
+                                {{ meta.school_count }} escolas &bull;
+                                carregado em {{ meta.uploaded_at[:16].replace('T', ' ') }}
+                            </span>
+                        </div>
+                    </div>
+                    <form action="/files/{{ filename }}/delete" method="POST" onsubmit="return confirm('Remover os dados de {{ filename }}?')">
+                        <button type="submit" class="btn-delete" title="Remover arquivo">&#128465; Remover</button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <section class="info-section">
+            <h3>O que este painel mostra?</h3>
+            <div class="info-grid">
+                <div class="info-card">
+                    <span class="info-emoji">&#128200;</span>
+                    <h4>PDDE Básico</h4>
+                    <p>Total recebido por escola no programa base do Dinheiro Direto na Escola.</p>
+                </div>
+                <div class="info-card">
+                    <span class="info-emoji">&#9989;</span>
+                    <h4>PDDE EQUIDADE</h4>
+                    <p>Recursos para diversidade, relações étnico-raciais e salas de recursos multifuncionais.</p>
+                </div>
+                <div class="info-card">
+                    <span class="info-emoji">&#127891;</span>
+                    <h4>PDDE QUALIDADE</h4>
+                    <p>Cantinho da Leitura, Toda Matemática, Educação Conectada e outros programas de qualidade.</p>
+                </div>
+                <div class="info-card">
+                    <span class="info-emoji">&#128161;</span>
+                    <h4>Múltiplos Anos</h4>
+                    <p>Envie arquivos de anos diferentes — os dados são mesclados e acumulados automaticamente.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>PDDE Dashboard &copy; 2025 &mdash; Ministério da Educação / FNDE</p>
+    </footer>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
