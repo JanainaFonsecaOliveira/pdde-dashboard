@@ -375,6 +375,12 @@ def api_schools():
                     'page': page, 'per_page': per_page})
 
 
+@app.route('/como-usar')
+def como_usar():
+    file_index = load_index()
+    return render_template('como-usar.html', file_index=file_index)
+
+
 @app.route('/api/files')
 def api_files():
     return jsonify(load_index())

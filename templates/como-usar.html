@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Como Usar - PDDE Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .guide-main { max-width: 860px; margin: 0 auto; padding: 32px 24px; }
+        .guide-hero { text-align: center; margin-bottom: 40px; }
+        .guide-hero h2 { font-size: 1.8rem; margin-bottom: 8px; }
+        .guide-hero p { color: var(--gray-600); font-size: 1rem; }
+
+        .steps { display: flex; flex-direction: column; gap: 24px; margin-bottom: 48px; }
+        .step-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-md); padding: 28px 28px 28px 100px; position: relative; }
+        .step-num {
+            position: absolute; left: 24px; top: 24px;
+            width: 48px; height: 48px; border-radius: 50%;
+            background: var(--blue); color: #fff;
+            font-size: 1.3rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .step-card h3 { font-size: 1.05rem; margin-bottom: 8px; }
+        .step-card p  { font-size: .88rem; color: var(--gray-600); line-height: 1.7; margin-bottom: 8px; }
+        .step-card a  { color: var(--blue); font-weight: 600; word-break: break-all; }
+        .step-card ul { padding-left: 18px; font-size: .88rem; color: var(--gray-600); line-height: 1.8; }
+
+        .tip-box {
+            background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px;
+            padding: 14px 18px; font-size: .85rem; color: #1e40af;
+            display: flex; gap: 10px; align-items: flex-start; margin-top: 12px;
+        }
+        .tip-icon { font-size: 1.2rem; flex-shrink: 0; }
+
+        .warn-box {
+            background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px;
+            padding: 14px 18px; font-size: .85rem; color: #92400e;
+            display: flex; gap: 10px; align-items: flex-start; margin-top: 12px;
+        }
+
+        .example-section { margin-bottom: 48px; }
+        .example-section h3 { font-size: 1.1rem; margin-bottom: 16px; }
+        .example-files { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .example-file { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; border-left: 4px solid var(--blue); }
+        .example-file h4 { font-size: .9rem; margin-bottom: 6px; }
+        .example-file p  { font-size: .82rem; color: var(--gray-600); line-height: 1.6; }
+        .badge-year { background: var(--blue); color: #fff; border-radius: 12px; padding: 2px 10px; font-size: .72rem; font-weight: 700; margin-left: 6px; }
+
+        .faq { margin-bottom: 48px; }
+        .faq h3 { font-size: 1.1rem; margin-bottom: 16px; }
+        .faq-item { background: var(--white); border-radius: 10px; box-shadow: var(--shadow); margin-bottom: 10px; overflow: hidden; }
+        .faq-q { padding: 16px 20px; font-weight: 600; font-size: .9rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .faq-q:hover { background: var(--gray-50); }
+        .faq-a { padding: 0 20px 16px; font-size: .85rem; color: var(--gray-600); line-height: 1.7; display: none; }
+        .faq-item.open .faq-a { display: block; }
+        .faq-item.open .faq-arrow { transform: rotate(180deg); }
+        .faq-arrow { transition: transform .2s; }
+
+        @media (max-width: 600px) {
+            .step-card { padding: 72px 20px 20px 20px; }
+            .step-num { top: 16px; left: 50%; transform: translateX(-50%); }
+            .example-files { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo">
+                <span class="logo-icon">&#127979;</span>
+                <div>
+                    <h1>PDDE Dashboard</h1>
+                    <p>Programa Dinheiro Direto na Escola</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="/" class="btn btn-outline">&#128196; Upload</a>
+                {% if file_index %}
+                <a href="/dashboard" class="btn btn-primary">&#128200; Dashboard</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <main class="guide-main">
+        <div class="guide-hero">
+            <span style="font-size:3rem">&#128218;</span>
+            <h2>Como Usar o PDDE Dashboard</h2>
+            <p>Guia passo a passo para exportar, importar e visualizar os dados do PDDE por escola.</p>
+        </div>
+
+        <!-- Steps -->
+        <section class="steps">
+
+            <div class="step-card">
+                <div class="step-num">1</div>
+                <h3>Acesse o sistema do FNDE</h3>
+                <p>Os dados das escolas são exportados diretamente do sistema oficial do FNDE. Acesse o link abaixo:</p>
+                <p><a href="https://www.fnde.gov.br/pddeinfo/pddeinfo/escola/consultar" target="_blank">
+                    &#128279; https://www.fnde.gov.br/pddeinfo/pddeinfo/escola/consultar
+                </a></p>
+                <div class="tip-box">
+                    <span class="tip-icon">&#128161;</span>
+                    <span>Você precisará informar o estado, município e o ano de exercício desejado. O sistema exporta os dados de <strong>um município por vez</strong> e <strong>um ano por vez</strong>.</span>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-num">2</div>
+                <h3>Preencha os filtros e exporte</h3>
+                <p>No sistema do FNDE, selecione:</p>
+                <ul>
+                    <li><strong>UF:</strong> Estado (ex: Maranhão - MA)</li>
+                    <li><strong>Município:</strong> Ex: Santa Rita ou Humberto de Campos</li>
+                    <li><strong>Exercício:</strong> Ano desejado (ex: 2026)</li>
+                    <li><strong>Situação:</strong> Deixe em branco para listar todas</li>
+                </ul>
+                <p>Clique em <strong>Consultar</strong> e depois em <strong>Exportar XLS</strong> para baixar o arquivo.</p>
+                <div class="warn-box">
+                    <span class="tip-icon">&#9888;</span>
+                    <span>Renomeie o arquivo com o <strong>ano no nome</strong> antes de importar, ex: <code>santa-rita-2026.xls</code> ou <code>humberto-campos-2026.xls</code>. Isso garante o funcionamento correto do <strong>filtro por ano</strong> no dashboard.</span>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-num">3</div>
+                <h3>Importe os arquivos no Dashboard</h3>
+                <p>Na <a href="/">página inicial</a>, arraste os arquivos XLS para a área de upload ou clique em <strong>"clique para selecionar"</strong>. Você pode selecionar vários arquivos de uma vez.</p>
+                <ul>
+                    <li>Múltiplos municípios e anos podem ser carregados juntos</li>
+                    <li>Os dados são <strong>mesclados automaticamente</strong></li>
+                    <li>Cada arquivo fica registrado individualmente e pode ser removido</li>
+                </ul>
+                <div class="tip-box">
+                    <span class="tip-icon">&#9989;</span>
+                    <span>Formatos aceitos: <strong>.xls</strong> (exportação padrão do FNDE) e <strong>.xlsx</strong>. Tamanho máximo: 32 MB por arquivo.</span>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-num">4</div>
+                <h3>Analise o Dashboard</h3>
+                <p>Após o upload, o dashboard exibe automaticamente:</p>
+                <ul>
+                    <li>&#128200; <strong>5 indicadores (KPIs):</strong> total de escolas, valor geral, PDDE Básico, EQUIDADE e QUALIDADE</li>
+                    <li>&#129002; <strong>Gráfico de distribuição</strong> entre os programas</li>
+                    <li>&#127970; <strong>Ranking de municípios</strong> por valor recebido</li>
+                    <li>&#128161; <strong>6 insights automáticos</strong> com análises relevantes</li>
+                    <li>&#127942; <strong>Top 5 escolas</strong> por total recebido</li>
+                    <li>&#128203; <strong>Tabela completa</strong> com busca por escola ou município</li>
+                </ul>
+            </div>
+
+            <div class="step-card">
+                <div class="step-num">5</div>
+                <h3>Use o filtro por ano (múltiplos arquivos)</h3>
+                <p>Se você importou arquivos de <strong>anos diferentes</strong>, uma barra de filtro aparece automaticamente no topo do dashboard.</p>
+                <ul>
+                    <li>Clique em um ano para <strong>ativar ou desativar</strong> esse período</li>
+                    <li>Todos os KPIs, gráficos, top 5 e tabela <strong>atualizam em tempo real</strong></li>
+                    <li>Clique em <strong>"Todos os anos"</strong> para resetar o filtro</li>
+                    <li>Pelo menos 1 ano ficará sempre selecionado</li>
+                </ul>
+                <div class="tip-box">
+                    <span class="tip-icon">&#128197;</span>
+                    <span>O filtro por ano só aparece quando há <strong>2 ou mais anos diferentes</strong> carregados. Com um único arquivo, fica oculto.</span>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Exemplos -->
+        <section class="example-section">
+            <h3>&#128193; Exemplos de Arquivos Carregados</h3>
+            <p style="font-size:.88rem;color:var(--gray-600);margin-bottom:16px;">
+                Os arquivos abaixo foram exportados do FNDE e podem ser usados como referência para entender o formato esperado.
+            </p>
+            <div class="example-files">
+                <div class="example-file">
+                    <h4>&#127979; Santa Rita - MA <span class="badge-year">2026</span></h4>
+                    <p>Município de Santa Rita, Maranhão. Contém 68 escolas da rede municipal com dados de PDDE Básico, EQUIDADE e QUALIDADE referentes ao exercício de 2026.</p>
+                    <p style="margin-top:8px;font-size:.78rem;color:var(--gray-400)">Arquivo: <code>santa-rita-2026.xls</code></p>
+                </div>
+                <div class="example-file">
+                    <h4>&#127979; Humberto de Campos - MA <span class="badge-year">2026</span></h4>
+                    <p>Município de Humberto de Campos, Maranhão. Exportado pelo mesmo sistema do FNDE para o mesmo exercício, permitindo comparação entre municípios.</p>
+                    <p style="margin-top:8px;font-size:.78rem;color:var(--gray-400)">Arquivo: <code>humberto-campos-2026.xls</code></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section class="faq">
+            <h3>&#10067; Perguntas Frequentes</h3>
+            <div class="faq-item">
+                <div class="faq-q">O ano não está sendo detectado automaticamente. O que fazer? <span class="faq-arrow">&#9660;</span></div>
+                <div class="faq-a">Certifique-se de que o nome do arquivo contenha o ano com 4 dígitos, por exemplo: <code>santa-rita-<strong>2026</strong>.xls</code> ou <code><strong>2025</strong>-humberto.xls</code>. O sistema detecta automaticamente qualquer sequência de 4 dígitos entre 2010 e 2035 no nome do arquivo.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-q">Posso carregar o mesmo município em anos diferentes? <span class="faq-arrow">&#9660;</span></div>
+                <div class="faq-a">Sim! Essa é justamente a funcionalidade de múltiplos arquivos. Carregue, por exemplo, <code>santa-rita-2024.xls</code> e <code>santa-rita-2025.xls</code> juntos. O dashboard mesclará os dados e o filtro por ano permitirá comparar os períodos.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-q">Como remover um arquivo já carregado? <span class="faq-arrow">&#9660;</span></div>
+                <div class="faq-a">Na página inicial, role até a seção <strong>"Arquivos Carregados"</strong>. Cada arquivo tem um botão <strong>Remover</strong> ao lado. Ao remover, os dados daquele arquivo são excluídos do dashboard automaticamente.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-q">O arquivo XLS do FNDE não está sendo aceito. Por quê? <span class="faq-arrow">&#9660;</span></div>
+                <div class="faq-a">O sistema aceita o formato XLS exportado diretamente pelo FNDE (que é internamente uma tabela HTML) e também arquivos XLSX normais. Certifique-se de que o arquivo foi baixado do sistema FNDE sem modificações. Caso tenha aberto e resalvado no Excel, use <strong>Salvar como → Excel 97-2003 (.xls)</strong>.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-q">Os dados são salvos permanentemente? <span class="faq-arrow">&#9660;</span></div>
+                <div class="faq-a">Os dados ficam armazenados no servidor enquanto a aplicação estiver rodando. Em ambientes de deploy como Render (plano gratuito), o disco pode ser reiniciado periodicamente — nesse caso será necessário fazer o upload novamente. Para garantir persistência, utilize um plano pago ou configure um volume de disco.</div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        <p>PDDE Dashboard &copy; 2025 &mdash; Ministério da Educação / FNDE</p>
+    </footer>
+
+    <script>
+        document.querySelectorAll('.faq-q').forEach(q => {
+            q.addEventListener('click', () => {
+                q.closest('.faq-item').classList.toggle('open');
+            });
+        });
+    </script>
+</body>
+</html>
